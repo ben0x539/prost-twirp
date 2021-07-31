@@ -18,13 +18,13 @@ use futures_util::{FutureExt, TryFutureExt};
 type Request = hyper::Request<Body>;
 type Response = hyper::Response<Body>;
 
-pub type FutReq<T> = Pin<Box<dyn Future<Output=Result<ServiceRequest<T>, ProstTwirpError>>>>;
+pub type FutReq<T> = Pin<Box<dyn Future<Output=Result<ServiceRequest<T>, ProstTwirpError>>+Send>>;
 
 /// The type of every service request 
 pub type PTReq<I> = ServiceRequest<I>;
 
 /// The type of every service response
-pub type PTRes<O> = Pin<Box<dyn Future<Output=Result<ServiceResponse<O>, ProstTwirpError>>>>;
+pub type PTRes<O> = Pin<Box<dyn Future<Output=Result<ServiceResponse<O>, ProstTwirpError>>+Send>>;
 
 /// A request with HTTP info and the serialized input object
 #[derive(Debug)]
@@ -428,10 +428,10 @@ impl<T: 'static + HyperService> HyperServer<T> {
     pub fn new(service: T) -> HyperServer<T> { HyperServer { service: Arc::new(service) } }
 }
 
-impl<T: 'static + HyperService> Service<Request> for HyperServer<T> {
+impl<T: Send + Sync + 'static + HyperService> Service<Request> for HyperServer<T> {
     type Response = Response;
     type Error = hyper::Error;
-    type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>>>>;
+    type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>>+Send>>;
 
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         Poll::Ready(Ok(())) // TODO
