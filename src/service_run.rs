@@ -441,7 +441,7 @@ impl<T: Send + Sync + 'static + HyperService> Service<Request> for HyperServer<T
         if req.method() != &Method::POST {
             Box::pin(future::ready(Ok(TwirpError::new(StatusCode::METHOD_NOT_ALLOWED, "bad_method",
                 "Method must be POST").to_hyper_resp())))
-        } else if req.headers().get(header::CONTENT_TYPE) == Some(&HeaderValue::from_static("application/protobuf")) {
+        } else if req.headers().get(header::CONTENT_TYPE) != Some(&HeaderValue::from_static("application/protobuf")) {
             Box::pin(future::ready(Ok(TwirpError::new(StatusCode::UNSUPPORTED_MEDIA_TYPE,
                 "bad_content_type", "Content type must be application/protobuf").to_hyper_resp())))
         } else {
