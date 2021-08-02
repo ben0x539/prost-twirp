@@ -1,14 +1,14 @@
-use futures::future;
-use hyper::{Client, StatusCode};
-use prost_twirp::TwirpError;
 use std::convert::Infallible;
 use std::env;
 use std::time::Duration;
 
-use tokio::sync::oneshot;
-use tokio::time;
+use futures::future;
+use hyper::{Client, StatusCode};
 use hyper::server::Server;
 use hyper::service::make_service_fn;
+use prost_twirp::TwirpError;
+use tokio::sync::oneshot;
+use tokio::time;
 
 mod service {
     include!(concat!(env!("OUT_DIR"), "/twitch.twirp.example.rs"));
