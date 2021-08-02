@@ -44,7 +44,7 @@ async fn main() {
 
     if run_client {
         let hyper_client = Client::new();
-        let service_client = <dyn service::Haberdasher>::new_client(hyper_client.clone(), "http://localhost:8080");
+        let service_client = <dyn service::Haberdasher>::new_client(hyper_client, "http://localhost:8080");
         // Try one too small, then too large, then just right
         let work = future::join_all([0, 11, 5].map(|inches| {
             let service_client = &service_client;
@@ -64,7 +64,7 @@ async fn main() {
 pub struct HaberdasherService;
 impl service::Haberdasher for HaberdasherService {
     fn make_hat(&self, i: service::PTReq<service::Size>) -> service::PTRes<service::Hat> {
-        Box::pin(async move {
+        Box::pin(future::result(
             if i.input.inches < 1 {
                 Err(TwirpError::new_meta(StatusCode::BAD_REQUEST, "too_small", "Size too small",
                     serde_json::to_value(MinMaxSize { min: 1, max: 10 }).ok()).into())
@@ -74,7 +74,7 @@ impl service::Haberdasher for HaberdasherService {
             } else {
                 Ok(service::Hat { size: i.input.inches, color: "blue".to_string(), name: "fedora".to_string() }.into())
             }
-        })
+        ))
     }
 }
 

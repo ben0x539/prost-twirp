@@ -43,7 +43,7 @@ async fn main() {
 
     if run_client {
         let hyper_client = Client::new();
-        let service_client = <dyn service::Haberdasher>::new_client(hyper_client.clone(), "http://localhost:8080");
+        let service_client = <dyn service::Haberdasher>::new_client(hyper_client, "http://localhost:8080");
         // Run the 5 like the other client
         let work = future::join_all((0..5).map(|_| async {
             let res = service_client.make_hat(service::Size { inches: 12 }.into()).await?;
