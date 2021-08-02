@@ -44,9 +44,10 @@ async fn main() {
 
     if run_client {
         let hyper_client = Client::new();
+        let service_client = <dyn service::Haberdasher>::new_client(hyper_client.clone(), "http://localhost:8080");
         // Try one too small, then too large, then just right
-        let work = future::join_all([0, 11, 5].map(move |inches| {
-            let service_client = <dyn service::Haberdasher>::new_client(hyper_client.clone(), "http://localhost:8080");
+        let work = future::join_all([0, 11, 5].map(|inches| {
+            let service_client = &service_client;
             async move {
                 let res = service_client.make_hat(service::Size { inches }.into()).await;
                 let res = res.map(|v| v.output).map_err(|e| e.root_err());
